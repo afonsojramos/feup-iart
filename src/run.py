@@ -59,10 +59,9 @@ for i, multiplier in enumerate(multipliers, start=1):
 x_test, y_test = test[:,:8], test[:,8]
 
 # model fitting
-model.fit(x_train, y_train,
-          epochs=5,
-          batch_size=128,
-          callbacks=[tensorboard])
+model.fit(X_resampled, y_resampled,
+        epochs=10,
+        batch_size=batch_size)
 
 # printing summary, scores and some stats
 score = model.evaluate(x_test, y_test, batch_size=128)
