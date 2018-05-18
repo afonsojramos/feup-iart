@@ -30,10 +30,6 @@ def split_train_dataset(data, test_ratio):
     train_indices = shuffled_indices[test_set_size:]
     return data[train_indices,:], data[test_indices,:]
 
-def ratio_func(y, multiplier, minority_class):
-    target_stats = Counter(y)
-    return {minority_class: int(multiplier * target_stats[minority_class])}
-
 def plot_resampling(ax, X, y, title):
     c0 = ax.scatter(X[y == 0, 0], X[y == 0, 1], label="Class #0", alpha=0.5)
     c1 = ax.scatter(X[y == 1, 0], X[y == 1, 1], label="Class #1", alpha=0.5)
