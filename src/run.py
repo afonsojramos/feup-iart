@@ -58,8 +58,6 @@ for i, multiplier in enumerate(multipliers, start=1):
 # generate test data
 x_test, y_test = test[:,:8], test[:,8]
 
-tensorboard = TensorBoard(log_dir='./../Graph', histogram_freq=0, write_graph=True, write_images=True)
-
 # model fitting
 model.fit(x_train, y_train,
           epochs=5,
