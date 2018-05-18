@@ -1,50 +1,69 @@
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras.optimizers import SGD
-#from IPython.display import SVG
-#from keras.utils.vis_utils import model_to_dot
+from keras.layers import Dense, Dropout, Activation, LeakyReLU
+from IPython.display import SVG
+from collections import Counter
+from keras.utils.vis_utils import model_to_dot
+from imblearn.datasets import make_imbalance
+
 import numpy as np
 import pandas as pds
 
-dataframeX = pds.read_csv('../dataset/HTRU_2.csv', names=['Integrated Profile: Mean', 'Standard Deviation', 'Excess Kurtosis', 'Skewness', 'DM-SNR Curve: Mean', '_Standard Deviation', '_Excess Kurtosis', '_Skewness'], usecols=[0, 1, 2, 3, 4, 5, 6, 7])
-dataframeY = pds.read_csv('../dataset/HTRU_2.csv', names=["Class"] , usecols=[8])
+""" dataframe = pds.read_csv('../dataset/HTRU_2.csv', names=['Integrated Profile: Mean', 'Standard Deviation', 'Excess Kurtosis', 'Skewness', 'DM-SNR Curve: Mean', '_Standard Deviation', '_Excess Kurtosis', '_Skewness']) """
 
-print(dataframeX.head())
-print(dataframeY.head())
- 
-data_dim = 20
-nb_classes = 4
+np.random.seed(42)
+
+dataframe = np.loadtxt('../dataset/HTRU_2.csv', delimiter=',', dtype=np.float64)
+
+def split_train_dataset(data, test_ratio):
+    shuffled_indices = np.random.permutation(len(data))
+    test_set_size = int(test_ratio * len(data))
+    test_indices = shuffled_indices[:test_set_size]
+    train_indices = shuffled_indices[test_set_size:]
+    return data[train_indices,:], data[test_indices,:]
+
+def ratio_func(y, multiplier, minority_class):
+    target_stats = Counter(y)
+    return {minority_class: int(multiplier * target_stats[minority_class])}
+
+data_dim = 8
  
 model = Sequential()
  
-# Dense(64) is a fully-connected layer with 64 hidden units.
-# in the first layer, you must specify the expected input data shape:
-# here, 20-dimensional vectors.
-model.add(Dense(64, input_dim=data_dim, init='uniform'))
+model.add(Dense(128, input_dim=data_dim, kernel_initializer='uniform'))
 model.add(Activation('tanh'))
 model.add(Dropout(0.5))
-model.add(Dense(64, init='uniform'))
-model.add(Activation('tanh'))
+model.add(Dense(64, kernel_initializer='uniform'))
+model.add(LeakyReLU(alpha=0.3))
 model.add(Dropout(0.5))
-model.add(Dense(nb_classes, init='uniform'))
-model.add(Activation('softmax'))
+model.add(Dense(1))
+model.add(Activation('sigmoid'))
  
-model.compile(loss='categorical_crossentropy',
-              optimizer='sgd',  
+model.compile(loss='binary_crossentropy',
+              optimizer='rmsprop',  
               metrics=["accuracy"])
  
-# generate dummy training data
-x_train = np.random.random((1000, data_dim))
-y_train = np.random.random((1000, nb_classes))
- 
-# generate dummy test data
-x_test = np.random.random((100, data_dim))
-y_test = np.random.random((100, nb_classes))
- 
-model.fit(x_train, y_train,
-          nb_epoch=20,
-          batch_size=16)
- 
-score = model.evaluate(x_test, y_test, batch_size=16)
+# generate training data
+train, test = split_train_dataset(dataframe, 0.2)
+x_train, y_train = train[:,:8], train[:,8]
 
+multipliers = [0.9, 0.75, 0.5, 0.25, 0.1]
+
+for i, multiplier in enumerate(multipliers, start=1):
+    X_train, Y_train = make_imbalance(x_train, y_train, ratio=ratio_func,
+                        **{"multiplier": multiplier,
+                        "minority_class": 0})
+print(test.shape, train.shape, X_train.shape)
+
+# generate test data
+x_test, y_test = test[:,:8], test[:,8]
+ 
+# model fitting
+model.fit(x_train, y_train,
+          epochs=5,
+          batch_size=128)
+ 
+score = model.evaluate(x_test, y_test, batch_size=128)
+print(score)
+
+model.save('my_model.h5')
 #SVG(model_to_dot(model).create(prog='dot', format='svg'))
