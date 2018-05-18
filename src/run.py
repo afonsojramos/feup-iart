@@ -1,12 +1,14 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, LeakyReLU
+from keras.callbacks import TensorBoard
 from IPython.display import SVG
 from collections import Counter
 from keras.utils.vis_utils import model_to_dot
+from keras.utils.vis_utils import plot_model
 from imblearn.datasets import make_imbalance
 
+import datetime
 import numpy as np
-import pandas as pds
 
 """ dataframe = pds.read_csv('../dataset/HTRU_2.csv', names=['Integrated Profile: Mean', 'Standard Deviation', 'Excess Kurtosis', 'Skewness', 'DM-SNR Curve: Mean', '_Standard Deviation', '_Excess Kurtosis', '_Skewness']) """
 
@@ -34,36 +36,43 @@ model.add(Activation('tanh'))
 model.add(Dropout(0.5))
 model.add(Dense(64, kernel_initializer='uniform'))
 model.add(LeakyReLU(alpha=0.3))
-model.add(Dropout(0.5))
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
  
 model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',  
               metrics=["accuracy"])
- 
 # generate training data
 train, test = split_train_dataset(dataframe, 0.2)
 x_train, y_train = train[:,:8], train[:,8]
 
+""" 
 multipliers = [0.9, 0.75, 0.5, 0.25, 0.1]
 
 for i, multiplier in enumerate(multipliers, start=1):
     X_train, Y_train = make_imbalance(x_train, y_train, ratio=ratio_func,
                         **{"multiplier": multiplier,
-                        "minority_class": 0})
-print(test.shape, train.shape, X_train.shape)
+                        "minority_class": 0}) 
+"""
 
 # generate test data
 x_test, y_test = test[:,:8], test[:,8]
- 
+
+tensorboard = TensorBoard(log_dir='./../Graph', histogram_freq=0, write_graph=True, write_images=True)
+
 # model fitting
 model.fit(x_train, y_train,
           epochs=5,
-          batch_size=128)
- 
-score = model.evaluate(x_test, y_test, batch_size=128)
-print(score)
+          batch_size=128,
+          callbacks=[tensorboard])
 
-model.save('my_model.h5')
+# printing summary, scores and some stats
+score = model.evaluate(x_test, y_test, batch_size=128)
+print(model.summary()) 
+print("Test Shape: ", test.shape, "\nTrain Shape: ",  train.shape)
+print("Score", score)
+
+uniq_filename = '../logs/' + str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.') + '.h5'
+model.save(uniq_filename)
+#plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
 #SVG(model_to_dot(model).create(prog='dot', format='svg'))
