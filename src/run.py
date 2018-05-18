@@ -6,6 +6,12 @@ from collections import Counter
 from keras.utils.vis_utils import model_to_dot
 from keras.utils.vis_utils import plot_model
 from imblearn.datasets import make_imbalance
+from imblearn.under_sampling import RandomUnderSampler
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_classification
+from sklearn.metrics import classification_report
+from sklearn.decomposition import PCA
 
 import datetime
 import numpy as np
@@ -64,6 +70,14 @@ model.fit(X_resampled, y_resampled,
         batch_size=batch_size)
 
 # printing summary, scores and some stats
+pred = model.predict(X_resampled, batch_size=batch_size)
+
+y_pred = np.argmax(pred, axis=1)
+
+report = classification_report(y_test, y_pred)
+
+print(report)
+
 score = model.evaluate(x_test, y_test, batch_size=128)
 print(model.summary()) 
 print("Test Shape: ", test.shape, "\nTrain Shape: ",  train.shape)
