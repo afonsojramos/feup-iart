@@ -67,7 +67,8 @@ model.fit(X_resampled, y_resampled,
 score = model.evaluate(x_test, y_test, batch_size=128)
 print(model.summary()) 
 print("Test Shape: ", test.shape, "\nTrain Shape: ",  train.shape)
-print("Score", score)
+print('Test score:', score[0])
+print('Test accuracy:', score[1])
 
 uniq_filename = '../logs/' + str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.') + '.h5'
 model.save(uniq_filename)
