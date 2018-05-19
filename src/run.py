@@ -65,14 +65,16 @@ model.compile(loss='binary_crossentropy',
 train, test = split_train_dataset(dataframe, 0.2)
 x_train, y_train = train[:,:8], train[:,8]
 
+# scaling
+""" pca = PCA(n_components=2)
+X_vis = pca.fit_transform(x_train) """
+
+# standart scaler
 """ scaler = StandardScaler().fit(x_train)
 x_train = scaler.transform(x_train) """
-pca = PCA(n_components=2)
 
-X_vis = pca.fit_transform(x_train)
-
-""" # Apply the random under-sampling
-rus = RandomUnderSampler(return_indices=True)
+# Apply the random under-sampling
+"""rus = RandomUnderSampler(return_indices=True)
 X_resampled, y_resampled, idx_resampled = rus.fit_sample(x_train, y_train)
 X_res_vis = pca.transform(X_resampled)
 
@@ -106,8 +108,8 @@ plt.tight_layout()
 plt.show() """
 
 # Apply regular SMOTE
-#kind = ['regular', 'borderline1', 'borderline2', 'svm']
-kind = ['regular']
+"""kind = ['regular', 'borderline1', 'borderline2', 'svm']
+#kind = ['regular']
 sm = [SMOTE(kind=k) for k in kind]
 X_resampled = []
 y_resampled = []
@@ -132,8 +134,7 @@ for i in range(len(kind)):
 ax2.legend((c0, c1), ('Class #0', 'Class #1'), loc='center',
            ncol=1, labelspacing=0.)
 plt.tight_layout()
-#plt.show()
-
+#plt.show() """
 
 # generate test data
 x_test, y_test = test[:,:8], test[:,8]
