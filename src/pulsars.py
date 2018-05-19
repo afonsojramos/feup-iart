@@ -243,7 +243,7 @@ def sampling(algorithm, x_train, y_train):
 
     else:
         return x_train, y_train
-        
+
     return X_resampled, y_resampled
 
 # removing some randomness to get cleaner results
@@ -262,7 +262,7 @@ x_test, y_test = test[:,:8], test[:,8]
 data_dim = 8
 batch_size = 128
 
-# model creation
+# model creation and configuration
 model = Sequential()
  
 model.add(Dense(128, input_dim=data_dim, kernel_initializer='uniform'))
