@@ -147,7 +147,7 @@ model.fit(x_train, y_train,
         batch_size=batch_size,
         callbacks=[tensorboard])
 
-# printing summary, scores and some stats
+# precision calculation
 pred = model.predict(x_test, batch_size=batch_size)
 
 y_pred = [i[0] for i in pred]
@@ -160,8 +160,7 @@ def precision_calculation(a):
 vfunc = np.vectorize(precision_calculation)
 y = vfunc(y_pred)
 
-#ipdb.set_trace()
-
+# reporting and printing summary, scores and some stats
 report = classification_report(y_test, y)
 
 print(report)
@@ -173,5 +172,3 @@ print('Test accuracy:', score[1])
 
 uniq_filename = '../logs/' + str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.') + '.h5'
 model.save(uniq_filename)
-#plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
-#SVG(model_to_dot(model).create(prog='dot', format='svg'))
