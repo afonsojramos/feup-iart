@@ -3,7 +3,7 @@ from keras.layers import Dense, Dropout, Activation, LeakyReLU
 from keras.callbacks import TensorBoard
 
 from imblearn.datasets import make_imbalance
-from imblearn.under_sampling import RandomUnderSampler, NeighbourhoodCleaningRule, AllKNN, EditedNearestNeighbours, RepeatedEditedNearestNeighbours
+from imblearn.under_sampling import RandomUnderSampler, NeighbourhoodCleaningRule, AllKNN, EditedNearestNeighbours, RepeatedEditedNearestNeighbours, ClusterCentroids
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import StandardScaler
 from sklearn.datasets import make_classification
@@ -90,7 +90,8 @@ def sampling(algorithm, x_train, y_train):
 
         pca = PCA(n_components=2)
         X_vis = pca.fit_transform(x_train)
-        kind = ['regular', 'borderline1', 'borderline2', 'svm']
+        # kind = ['regular', 'borderline1', 'borderline2', 'svm']
+        kind = sys.argv[2]
         sm = [SMOTE(kind=k) for k in kind]
         X_resampled = []
         y_resampled = []
@@ -101,9 +102,7 @@ def sampling(algorithm, x_train, y_train):
             y_resampled.append(y_res)
             X_res_vis.append(pca.transform(X_res))
 
-        # Two subplots, unpack the axes array immediately
-        (ax1, ax2), (ax3, ax4), (ax5, ax6) = plt.subplots(3, 2)
-        # Remove axis for second plot
+        f, ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2)
         ax2.axis('off')
         ax_res = [ax3, ax4, ax5, ax6]
 
@@ -155,8 +154,7 @@ def sampling(algorithm, x_train, y_train):
     elif(algorithm == 'ENN'):
 
         enn = EditedNearestNeighbours(return_indices=True)
-        X_resampled, y_resampled, idx_resampled = enn.fit_sample(x_train, y_train)
-        idx_samples_removed = np.setdiff1d(np.arange(X_vis.shape[0]), idx_resampled)
+        X_resampled, y_resampled = enn.fit_sample(x_train, y_train)
         reduction_str = ('Reduced {:.2f}%'.format(100 * (1 - float(len(X_resampled)) /
                                                         len(x_train))))
         print(reduction_str)
@@ -164,8 +162,7 @@ def sampling(algorithm, x_train, y_train):
     elif(algorithm == 'RENN'):
 
         renn = RepeatedEditedNearestNeighbours(return_indices=True)
-        X_resampled, y_resampled, idx_resampled = renn.fit_sample(x_train, y_train)
-        idx_samples_removed = np.setdiff1d(np.arange(X_vis.shape[0]), idx_resampled)
+        X_resampled, y_resampled = renn.fit_sample(x_train, y_train)
         reduction_str = ('Reduced {:.2f}%'.format(100 * (1 - float(len(X_resampled)) /
                                                         len(x_train))))
         print(reduction_str)
@@ -173,14 +170,80 @@ def sampling(algorithm, x_train, y_train):
     elif(algorithm == 'AllKNN'):
 
         allknn = AllKNN(return_indices=True)
-        X_resampled, y_resampled, idx_resampled = allknn.fit_sample(x_train, y_train)
-        idx_samples_removed = np.setdiff1d(np.arange(X_vis.shape[0]), idx_resampled)
+        X_resampled, y_resampled = allknn.fit_sample(x_train, y_train)
         reduction_str = ('Reduced {:.2f}%'.format(100 * (1 - float(len(X_resampled)) /
                                                         len(x_train))))
         print(reduction_str)
 
+    elif(algorithm == 'centroids'):
+
+        # Apply Cluster Centroids
+        cc = ClusterCentroids()
+        X_resampled, y_resampled = cc.fit_sample(x_train, y_train)
+
+    elif(algorithm == 'centroidshard'):
+
+        # Apply Cluster Centroids
+        cc = ClusterCentroids()
+        X_resampled, y_resampled = cc.fit_sample(x_train, y_train)
+        X_res_vis_soft = pca.transform(X_resampled)
+
+        # Use hard voting instead of soft voting
+        cc = ClusterCentroids(voting='hard')
+        X_resampled, y_resampled = cc.fit_sample(x_train, y_train)
+        X_res_vis_hard = pca.transform(X_resampled)
+
+        # Two subplots, unpack the axes array immediately
+        f, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+
+        c0 = ax1.scatter(X_vis[y_train == 0, 0], X_vis[y_train == 0, 1], label="Class #0",
+                        alpha=0.5)
+        c1 = ax1.scatter(X_vis[y_train == 1, 0], X_vis[y_train == 1, 1], label="Class #1",
+                        alpha=0.5)
+        ax1.set_title('Original set')
+
+        ax2.scatter(X_res_vis_soft[y_resampled == 0, 0],
+                    X_res_vis_soft[y_resampled == 0, 1],
+                    label="Class #0", alpha=.5)
+        ax2.scatter(X_res_vis_soft[y_resampled == 1, 0],
+                    X_res_vis_soft[y_resampled == 1, 1],
+                    label="Class #1", alpha=.5)
+        c2 = ax2.scatter(X_vis[y_train == 1, 0],
+                        X_vis[y_train == 1, 1], label="Original #1",
+                        alpha=0.2)
+        ax2.set_title('Cluster centroids with soft voting')
+
+        ax3.scatter(X_res_vis_hard[y_resampled == 0, 0],
+                    X_res_vis_hard[y_resampled == 0, 1],
+                    label="Class #0", alpha=.5)
+        ax3.scatter(X_res_vis_hard[y_resampled == 1, 0],
+                    X_res_vis_hard[y_resampled == 1, 1],
+                    label="Class #1", alpha=.5)
+        ax3.scatter(X_vis[y_train == 1, 0],
+                    X_vis[y_train == 1, 1],
+                    alpha=0.2)
+        ax3.set_title('Cluster centroids with hard voting')
+
+        # make nice plotting
+        for ax in (ax1, ax2, ax3):
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.get_xaxis().tick_bottom()
+            ax.get_yaxis().tick_left()
+            ax.spines['left'].set_position(('outward', 10))
+            ax.spines['bottom'].set_position(('outward', 10))
+            ax.set_xlim([-6, 8])
+            ax.set_ylim([-6, 6])
+
+        plt.figlegend((c0, c1), ('Class #0', 'Class #1', 'Original Class #1'),
+                    loc='lower center',
+                    ncol=3, labelspacing=0.)
+        plt.tight_layout(pad=3)
+        plt.show()
+
     else:
         return x_train, y_train
+        
     return X_resampled, y_resampled
 
 # removing some randomness to get cleaner results
