@@ -148,15 +148,25 @@ model.fit(x_train, y_train,
         callbacks=[tensorboard])
 
 # printing summary, scores and some stats
-pred = model.predict(X_resampled, batch_size=batch_size)
+pred = model.predict(x_test, batch_size=batch_size)
 
-y_pred = np.argmax(pred, axis=1)
+y_pred = [i[0] for i in pred]
 
-report = classification_report(y_test, y_pred)
+def precision_calculation(a):
+    if a > 0.5:
+        return 1.0
+    return 0.0
+
+vfunc = np.vectorize(precision_calculation)
+y = vfunc(y_pred)
+
+#ipdb.set_trace()
+
+report = classification_report(y_test, y)
 
 print(report)
 
-score = model.evaluate(x_test, y_test, batch_size=128)
+score = model.evaluate(x_test, y_test, batch_size=batch_size)
 print(model.summary()) 
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
