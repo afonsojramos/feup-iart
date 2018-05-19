@@ -139,10 +139,13 @@ plt.tight_layout()
 # generate test data
 x_test, y_test = test[:,:8], test[:,8]
 
+tensorboard = TensorBoard(log_dir='./../Graph', histogram_freq=0, write_graph=True, write_images=True)
+
 # model fitting
-model.fit(X_resampled, y_resampled,
-        epochs=10,
-        batch_size=batch_size)
+model.fit(x_train, y_train,
+        epochs=5,
+        batch_size=batch_size,
+        callbacks=[tensorboard])
 
 # printing summary, scores and some stats
 pred = model.predict(X_resampled, batch_size=batch_size)
