@@ -20,6 +20,7 @@ np.random.seed(42)
 
 dataframe = np.loadtxt('../dataset/HTRU_2.csv', delimiter=',', dtype=np.float64)
 
+# split training dataset
 def split_train_dataset(data, test_ratio):
     shuffled_indices = np.random.permutation(len(data))
     test_set_size = int(test_ratio * len(data))
@@ -27,6 +28,7 @@ def split_train_dataset(data, test_ratio):
     train_indices = shuffled_indices[test_set_size:]
     return data[train_indices,:], data[test_indices,:]
 
+# oversampling auxiliary plot function
 def plot_resampling(ax, X, y, title):
     c0 = ax.scatter(X[y == 0, 0], X[y == 0, 1], label="Class #0", alpha=0.5)
     c1 = ax.scatter(X[y == 1, 0], X[y == 1, 1], label="Class #1", alpha=0.5)
@@ -152,8 +154,7 @@ print(report)
 
 score = model.evaluate(x_test, y_test, batch_size=128)
 print(model.summary()) 
-print("Test Shape: ", test.shape, "\nTrain Shape: ",  train.shape)
-print('Test score:', score[0])
+print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 uniq_filename = '../logs/' + str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.') + '.h5'
