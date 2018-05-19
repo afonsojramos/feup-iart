@@ -1,8 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, LeakyReLU
 from keras.callbacks import TensorBoard
-from IPython.display import SVG
-from collections import Counter
 from imblearn.datasets import make_imbalance
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
