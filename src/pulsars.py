@@ -102,7 +102,7 @@ def sampling(algorithm, x_train, y_train):
             X_res_vis.append(pca.transform(X_res))
 
         # Two subplots, unpack the axes array immediately
-        ((ax1, ax2), (ax3, ax4), (ax5, ax6)) = plt.subplots(3, 2)
+        (ax1, ax2), (ax3, ax4), (ax5, ax6) = plt.subplots(3, 2)
         # Remove axis for second plot
         ax2.axis('off')
         ax_res = [ax3, ax4, ax5, ax6]
@@ -214,7 +214,7 @@ model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',  
               metrics=["accuracy"])
 
-x_train, y_train = sampling('ENN', x_train, y_train)
+x_train, y_train = sampling(sys.argv[1], x_train, y_train)
 
 tensorboard = TensorBoard(log_dir='./../Graph', histogram_freq=0, write_graph=True, write_images=True)
 
