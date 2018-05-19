@@ -3,8 +3,6 @@ from keras.layers import Dense, Dropout, Activation, LeakyReLU
 from keras.callbacks import TensorBoard
 from IPython.display import SVG
 from collections import Counter
-from keras.utils.vis_utils import model_to_dot
-from keras.utils.vis_utils import plot_model
 from imblearn.datasets import make_imbalance
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import SMOTE
@@ -17,8 +15,7 @@ import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-""" dataframe = pds.read_csv('../dataset/HTRU_2.csv', names=['Integrated Profile: Mean', 'Standard Deviation', 'Excess Kurtosis', 'Skewness', 'DM-SNR Curve: Mean', '_Standard Deviation', '_Excess Kurtosis', '_Skewness']) """
-
+# removing some randomness to get cleaner results
 np.random.seed(42)
 
 dataframe = np.loadtxt('../dataset/HTRU_2.csv', delimiter=',', dtype=np.float64)
