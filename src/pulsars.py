@@ -47,11 +47,15 @@ def sampling(algorithm, x_train, y_train):
 
     if (algorithm == 'standard'):
 
+        print('\nUsing Standard Scaler.\n')
+
         scaler = StandardScaler().fit(x_train)
         X_resampled = scaler.transform(x_train)
         y_resampled = y_train
 
     elif(algorithm == 'undersampling'):
+
+        print('\nUsing Random Under Sampling.\n')
 
         rus = RandomUnderSampler(return_indices=True)
         X_resampled, y_resampled, idx_resampled = rus.fit_sample(x_train, y_train)
@@ -88,10 +92,13 @@ def sampling(algorithm, x_train, y_train):
 
     elif(algorithm == 'smote'):
 
+        print('\nUsing SMOTE.\n')
+
         pca = PCA(n_components=2)
         X_vis = pca.fit_transform(x_train)
-        # kind = ['regular', 'borderline1', 'borderline2', 'svm']
-        kind = sys.argv[2]
+        kinds = ['regular', 'borderline1', 'borderline2', 'svm']
+        kind = [kinds[int(sys.argv[2])]]
+        print(kind)
         sm = [SMOTE(kind=k) for k in kind]
         X_resampled = []
         y_resampled = []
@@ -117,6 +124,8 @@ def sampling(algorithm, x_train, y_train):
         plt.show()
 
     elif(algorithm=='neighbourhood'):
+
+        print('\nUsing Neighbourhood Cleaning Rule.\n')
 
         ncl = NeighbourhoodCleaningRule(return_indices=True)
         X_resampled, y_resampled, idx_resampled = ncl.fit_sample(x_train, y_train)
@@ -153,35 +162,45 @@ def sampling(algorithm, x_train, y_train):
 
     elif(algorithm == 'ENN'):
 
+        print('\nUsing ENN.\n')
+
         enn = EditedNearestNeighbours(return_indices=True)
-        X_resampled, y_resampled = enn.fit_sample(x_train, y_train)
+        X_resampled, y_resampled, idx_resampled = enn.fit_sample(x_train, y_train)
         reduction_str = ('Reduced {:.2f}%'.format(100 * (1 - float(len(X_resampled)) /
                                                         len(x_train))))
         print(reduction_str)
 
     elif(algorithm == 'RENN'):
 
+        print('\nUsing RENN.\n')
+
         renn = RepeatedEditedNearestNeighbours(return_indices=True)
-        X_resampled, y_resampled = renn.fit_sample(x_train, y_train)
+        X_resampled, y_resampled, idx_resampled = renn.fit_sample(x_train, y_train)
         reduction_str = ('Reduced {:.2f}%'.format(100 * (1 - float(len(X_resampled)) /
                                                         len(x_train))))
         print(reduction_str)
 
     elif(algorithm == 'AllKNN'):
 
+        print('\nUsing AllKNN.\n')
+
         allknn = AllKNN(return_indices=True)
-        X_resampled, y_resampled = allknn.fit_sample(x_train, y_train)
+        X_resampled, y_resampled, idx_resampled = allknn.fit_sample(x_train, y_train)
         reduction_str = ('Reduced {:.2f}%'.format(100 * (1 - float(len(X_resampled)) /
                                                         len(x_train))))
         print(reduction_str)
 
     elif(algorithm == 'centroids'):
 
+        print('\nUsing Cluster Centroids.\n')
+
         # Apply Cluster Centroids
         cc = ClusterCentroids()
         X_resampled, y_resampled = cc.fit_sample(x_train, y_train)
 
     elif(algorithm == 'centroidshard'):
+
+        print('\nUsing Cluster Centroids with Hard Voting.\n')
 
         # Apply Cluster Centroids
         cc = ClusterCentroids()
@@ -265,7 +284,7 @@ batch_size = 128
 # model creation and configuration
 model = Sequential()
  
-model.add(Dense(128, input_dim=data_dim, kernel_initializer='uniform'))
+model.add(Dense(9, input_dim=data_dim, kernel_initializer='uniform'))
 model.add(Activation('tanh'))
 model.add(Dropout(0.5))
 model.add(Dense(64, kernel_initializer='uniform'))
