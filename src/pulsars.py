@@ -100,7 +100,7 @@ def sampling(algorithm, x_train, y_train):
         X_vis = pca.fit_transform(x_train)
 
         kinds = ['regular', 'borderline1', 'borderline2', 'svm']
-        kind = [kinds[int(sys.argv[2])]]
+        kind = [kinds[int(sys.argv[2] if len(sys.argv) >= 3 else 'regular')]]
         print(kind)
         sm = [SMOTE(kind=k) for k in kind]
         X_resampled = []
@@ -129,6 +129,9 @@ def sampling(algorithm, x_train, y_train):
     elif(algorithm=='neighbourhood'):
 
         print('\nUsing Neighbourhood Cleaning Rule.\n')
+
+        pca = PCA(n_components=2)
+        X_vis = pca.fit_transform(x_train)
 
         ncl = NeighbourhoodCleaningRule(return_indices=True)
         X_resampled, y_resampled, idx_resampled = ncl.fit_sample(x_train, y_train)
@@ -205,6 +208,8 @@ def sampling(algorithm, x_train, y_train):
 
         print('\nUsing Cluster Centroids with Hard Voting.\n')
 
+        pca = PCA(n_components=2)
+        X_vis = pca.fit_transform(x_train)
         # Apply Cluster Centroids
         cc = ClusterCentroids()
         X_resampled, y_resampled = cc.fit_sample(x_train, y_train)
@@ -230,7 +235,7 @@ def sampling(algorithm, x_train, y_train):
         ax2.scatter(X_res_vis_soft[y_resampled == 1, 0],
                     X_res_vis_soft[y_resampled == 1, 1],
                     label="Class #1", alpha=.5)
-        c2 = ax2.scatter(X_vis[y_train == 1, 0],
+        ax2.scatter(X_vis[y_train == 1, 0],
                         X_vis[y_train == 1, 1], label="Original #1",
                         alpha=0.2)
         ax2.set_title('Cluster centroids with soft voting')
@@ -289,6 +294,7 @@ x_test, y_test = test[:,:8], test[:,8]
 
 data_dim = 8
 batch_size = 128
+optimizer = 'rmsprop'
 
 # model creation and configuration
 model = Sequential()
@@ -302,7 +308,7 @@ model.add(Dense(1))
 model.add(Activation('sigmoid'))
  
 model.compile(loss='binary_crossentropy',
-              optimizer='rmsprop',  
+              optimizer=optimizer,  
               metrics=["accuracy"])
 
 x_train, y_train = sampling(sys.argv[1] if len(sys.argv) >= 2 else 'base', x_train, y_train)
@@ -335,8 +341,8 @@ print(report)
 
 score = model.evaluate(x_test, y_test, batch_size=batch_size)
 print(model.summary()) 
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+print('\nTest loss:', score[0])
+print('Test accuracy:', score[1], 'with', sys.argv[1] if len(sys.argv) >= 2 else 'base', 'sampling.')
 
-uniq_filename = '../logs/' + str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.') + '.h5'
+uniq_filename = '../logs/' + str("%.7f" % score[1]) + '_' + optimizer + '_' + (sys.argv[1] if len(sys.argv) >= 2 else 'base') + '_' + str(datetime.datetime.now().date()) + '.h5'
 model.save(uniq_filename)
