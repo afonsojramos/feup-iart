@@ -40,10 +40,6 @@ def plot_resampling(ax, X, y, title):
     return c0, c1
 
 def sampling(algorithm, x_train, y_train):
-    # Instanciate a PCA object for the sake of easy visualisation
-    pca = PCA(n_components=2)
-    # Fit and transform x to visualise inside a 2D feature space
-    X_vis = pca.fit_transform(x_train)
 
     if (algorithm == 'standard'):
 
@@ -54,6 +50,10 @@ def sampling(algorithm, x_train, y_train):
         y_resampled = y_train
 
     elif(algorithm == 'undersampling'):
+        # Instanciate a PCA object for the sake of easy visualisation
+        pca = PCA(n_components=2)
+        # Fit and transform x to visualise inside a 2D feature space
+        X_vis = pca.fit_transform(x_train)
 
         print('\nUsing Random Under Sampling.\n')
 
@@ -94,8 +94,11 @@ def sampling(algorithm, x_train, y_train):
 
         print('\nUsing SMOTE.\n')
 
+        # Instanciate a PCA object for the sake of easy visualisation
         pca = PCA(n_components=2)
+        # Fit and transform x to visualise inside a 2D feature space
         X_vis = pca.fit_transform(x_train)
+
         kinds = ['regular', 'borderline1', 'borderline2', 'svm']
         kind = [kinds[int(sys.argv[2])]]
         print(kind)
@@ -261,6 +264,12 @@ def sampling(algorithm, x_train, y_train):
         plt.show()
 
     else:
+        
+        # Instanciate a PCA object for the sake of easy visualisation
+        pca = PCA(n_components=2)
+        # Fit and transform x to visualise inside a 2D feature space
+        X_vis = pca.fit_transform(x_train)
+
         return x_train, y_train
 
     return X_resampled, y_resampled
@@ -287,7 +296,7 @@ model = Sequential()
 model.add(Dense(9, input_dim=data_dim, kernel_initializer='uniform'))
 model.add(Activation('tanh'))
 model.add(Dropout(0.5))
-model.add(Dense(64, kernel_initializer='uniform'))
+model.add(Dense(32, kernel_initializer='uniform'))
 model.add(LeakyReLU(alpha=0.3))
 model.add(Dense(1))
 model.add(Activation('sigmoid'))
@@ -296,7 +305,7 @@ model.compile(loss='binary_crossentropy',
               optimizer='rmsprop',  
               metrics=["accuracy"])
 
-x_train, y_train = sampling(sys.argv[1], x_train, y_train)
+x_train, y_train = sampling(sys.argv[1] if len(sys.argv) >= 2 else 'base', x_train, y_train)
 
 tensorboard = TensorBoard(log_dir='./../Graph', histogram_freq=0, write_graph=True, write_images=True)
 
