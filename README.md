@@ -2,7 +2,7 @@
 Projects for the Artificial Intelligence (IART) class of the Master in Informatics and Computer Engineering (MIEIC) at the Faculty of Engineering of the University of Porto (FEUP).
 
 
-Made in colaboration with [Afonso Ramos](https://github.com/afonsojramos) and [Julieta Frade](https://github.com/julietafrade97).<br>
+Made by [Afonso Ramos](https://github.com/afonsojramos), [Julieta Frade](https://github.com/julietafrade97) and [Sofia Silva](https://github.com/literallysofia).<br>
 **Completed in 21/05/2018.**
 
 ## Neural Networks to Identify Pulsars
